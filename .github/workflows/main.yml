@@ -13,31 +13,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Download project
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Check Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          test -d "$ANDROID_HOME/platforms" || exit 1
 
-      - name: Install Android packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Install Gradle
+      - name: Build APK
         run: |
           curl -L https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
-
-      - name: Build APK
-        run: /tmp/gradle-8.7/bin/gradle assembleDebug
+          /tmp/gradle-8.7/bin/gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: minsk-metro-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
